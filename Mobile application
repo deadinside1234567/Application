@@ -1,0 +1,97 @@
+Това е код за начина на работа с географско местоположение и карти.
+
+//Импортира се необходимите библиотеки, като System, Android и други, за да се осигурят основните функционалности и класове за приложението.
+
+using System;
+using Android;
+using Android.App;
+using Android.Content.PM;
+using Android.OS;
+using Android.Runtime;
+
+//Деклариране на пространството от имена (namespace) за приложението.
+
+namespace WorkingWithMaps.Droid
+{
+
+//Този атрибут декларира Activity-то с различни свойства:
+//Label: Името на Activity-то.
+//Icon: Иконата на приложението.
+//Theme: Темата на приложението.
+//MainLauncher: Дали това е главното Activity (първоначалното).
+//ConfigurationChanges: Конфигурационните промени, които Activity-то ще управлява.
+
+    [Activity(Label = "WorkingWithMaps", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+
+     //Декларира се основното Activity, което наследява FormsAppCompatActivity от Xamarin.Forms.
+
+    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+    {
+    //RequestLocationId: Константа за идентификация на заявката за разрешение за достъп до местоположението.
+    LocationPermissions: Масив от нужните разрешения за достъп до местоположението.
+        const int RequestLocationId = 0;
+
+        readonly string[] LocationPermissions =
+        {
+            Manifest.Permission.AccessCoarseLocation,
+            Manifest.Permission.AccessFineLocation
+        };
+        //Инициализация на платформата Xamarin.Essentials.
+        //Инициализация на Xamarin.Forms.
+        //Инициализация на картите в Xamarin.Forms.
+        //Зареждане на основното приложение.
+
+        protected override async void OnCreate(Bundle savedInstanceState)
+        {
+            base.OnCreate(savedInstanceState);
+
+            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            Xamarin.FormsMaps.Init(this, savedInstanceState);
+            LoadApplication(new App());
+        }
+       //Проверка на версията на Android (ако е 23 или по-нова).
+       //Проверка дали разрешението за достъп до местоположението е предоставено.
+       //Ако не е предоставено, изисква се разрешение от потребителя.
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+
+            if ((int)Build.VERSION.SdkInt >= 23)
+            {
+                if (CheckSelfPermission(Manifest.Permission.AccessFineLocation) != Permission.Granted)
+                {
+                    RequestPermissions(LocationPermissions, RequestLocationId);
+                }
+                else
+                {
+                    Console.WriteLine("Location permissions already granted.");
+                }
+            }
+        }
+        //Обработка на резултата от заявката за разрешение.
+        //Ако разрешението е предоставено, се изписва съобщение, че е предоставено.
+        //Ако е отказано, се изписва съобщение, че е отказано.
+        //Ако заявката не е за местоположение, се извиква основната обработка на резултата.
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        {
+            if (requestCode == RequestLocationId)
+            {
+                if ((grantResults.Length == 1) && (grantResults[0] == (int)Permission.Granted))
+                {
+                    Console.WriteLine("Location permissions granted.");
+                }
+                else
+                {
+                    Console.WriteLine("Location permissions denied.");
+                }
+            }
+            else
+            {
+                base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            }
+        }
+    }
+}
